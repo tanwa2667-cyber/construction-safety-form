@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>ระบบวิเคราะห์ความเสี่ยงงานก่อสร้าง</title>
+
+<style>
+body{
+    font-family: "Sarabun", sans-serif;
+    background:#eef2f7;
+    padding:30px;
+}
+.container{
+    max-width:1000px;
+    margin:auto;
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.15);
+}
+h1{
+    text-align:center;
+}
+label{
+    font-weight:bold;
+}
+input, textarea, select{
+    width:100%;
+    padding:8px;
+    margin:6px 0 15px 0;
+}
+button{
+    padding:10px 18px;
+    margin-right:10px;
+    font-size:16px;
+    cursor:pointer;
+}
+#output{
+    white-space:pre-wrap;
+    background:#f9f9f9;
+    padding:20px;
+    margin-top:25px;
+    border-radius:8px;
+    border:1px solid #ddd;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>ระบบจัดทำแผนความปลอดภัยงานก่อสร้าง</h1>
+
+<label>ชื่อโครงการ</label>
+<input id="project">
+
+<label>สถานที่ก่อสร้าง</label>
+<input id="location">
+
+<label>ลักษณะงานก่อสร้าง</label>
+<input id="type">
+
+<label>กิจกรรมงานที่ทำ (คั่นด้วย , )</label>
+<textarea id="activity"></textarea>
+
+<label>ลักษณะพื้นที่หน้างาน</label>
+<input id="area">
+
+<label>ระยะเวลาก่อสร้าง</label>
+<input id="time">
+
+<label>จำนวนคนงาน</label>
+<input id="workers" type="number">
+
+<label>ผู้รับผิดชอบความปลอดภัย</label>
+<input id="responsible">
+
+<label>มาตรการความปลอดภัยที่มีอยู่</label>
+<textarea id="measure"></textarea>
+
+<label>PPE ที่มี</label>
+<textarea id="ppe"></textarea>
+
+<label>อบรมก่อนทำงาน</label>
+<select id="training">
+<option>มี</option>
+<option>ไม่มี</option>
+</select>
+
+<label>ป้ายเตือน/แผงกั้น</label>
+<select id="sign">
+<option>มี</option>
+<option>ไม่มี</option>
+</select>
+
+<button onclick="generate()">สร้างรายงาน</button>
+<button onclick="downloadPDF()">Export PDF</button>
+
+<div id="output"></div>
+</div>
+
+<script>
+function generate(){
+
+const data = {
+p: project.value,
+l: location.value,
+t: type.value,
+a: activity.value,
+ar: area.value,
+ti: time.value,
+w: workers.value,
+r: responsible.value,
+m: measure.value,
+ppe: ppe.value,
+tr: training.value,
+s: sign.value
+};
+
+const activities = data.a.split(",");
+
+let table = "";
+
+activities.forEach(act=>{
+table += `${act.trim()} | ตกจากที่สูง/ชน/เครื่องจักร | สภาพพื้นที่และการควบคุมไม่เพียงพอ | บาดเจ็บ/ทรัพย์สินเสียหาย | ปานกลาง-สูง | ใช้ราวกันตก/อบรม/PPE | ${data.r}\n`;
+});
+
+const text = `
+รายงานแผนความปลอดภัยในงานก่อสร้าง
+==========================================
+
+1. ข้อมูลสรุปหน้างาน
+โครงการ "${data.p}" ตั้งอยู่ที่ ${data.l} เป็นงาน ${data.t}
+มี ativities ได้แก่ ${data.a} พื้นที่ ${data.ar}
+ระยะเวลาก่อสร้าง ${data.ti} คนงาน ${data.w} คน
+ผู้รับผิดชอบความปลอดภัย ${data.r}
+
+2. การวิเคราะห์ความเสี่ยง
+อาจเกิดอุบัติเหตุจากการทำงานที่สูง เครื่องจักร วัสดุตกหล่น และไฟฟ้า
+
+3. การประเมินความเสี่ยง
+ระดับปานกลางถึงสูง เนื่องจากมีแรงงานจำนวนมากและเครื่องจักรหนัก
+
+4. แนวทางควบคุม
+- วิศวกรรม: ราวกันตก/แผงกั้น
+- บริหาร: อบรม/Toolbox talk
+- PPE: ${data.ppe}
+
+5. แผนความปลอดภัย
+- ตรวจสอบประจำวัน
+- แต่งตั้ง จป.
+- แผนฉุกเฉิน
+- รายงานอุบัติเหตุ
+
+6. ตารางประเมินความเสี่ยง
+กิจกรรม | อันตราย | สาเหตุ | ผลกระทบ | ระดับ | มาตรการ | ผู้รับผิดชอบ
+${table}
+`;
+
+output.innerText = text;
+}
+
+function downloadPDF(){
+const element = document.createElement("a");
+const file = new Blob([output.innerText], {type: 'text/plain'});
+element.href = URL.createObjectURL(file);
+element.download = "SafetyPlan.txt";
+element.click();
+}
+</script>
+
+</body>
+</html>
